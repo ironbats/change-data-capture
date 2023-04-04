@@ -1,0 +1,30 @@
+curl -H 'Content-Type: application/json' debezium:8083/connectors --data '
+{
+  "name": "stockconsolidate",  
+  "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector", 
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "key.converter.schemas.enable": "false",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": "false",
+        "database.hostname": "172.18.0.3", 
+        "database.port": "3307", 
+        "database.user": "admin", 
+        "database.password": "admin", 
+        "database.server.name": "simdb", 
+        "database.server.id": "21331233",
+        "database.include.list": "simdb", 
+        "database.history.kafka.bootstrap.servers": "kafka:9092", 
+        "database.history.kafka.topic": "stock.consolidate",
+        "include.schema.changes": "true"
+  }
+}'
+
+
+
+get:
+curl -i -X GET debezium:8083/connectors/stockconnector
+
+
+delete:
+curl -i -X DELETE debezium:8083/connectors/stockconnector

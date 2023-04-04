@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  debezium:
+    image: debezium/connect:1.5
+    environment:
+      BOOTSTRAP_SERVERS: 127.0.0.1:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    ports:
+      - "8083:8083"
+    expose:
+      - 8083
