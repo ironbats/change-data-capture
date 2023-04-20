@@ -1,0 +1,37 @@
+curl --location --request POST 'http://debezium:8083/connectors' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "stock-consolidate",
+  "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+        "database.hostname": "mysql_simdb",
+        "database.port": "3306",
+        "database.user": "admin",
+        "database.password": "admin",
+        "database.server.name": "stock.ingestion",
+        "database.server.id": "1",
+        "database.include.list": "simdb",
+        "database.history.kafka.bootstrap.servers": "kafka:9092",
+        "database.history.kafka.topic": "stock.ingestion.history",
+        "include.schema.changes": "true",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "key.converter.schemas.enable": "false",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": "false",
+        "topic.prefix": "stock.ingestion",
+        "table.include.list": "simdb.*",
+        "topic": "stock.ingestion"
+
+  }
+}'
+
+// essa propriedade inclui o evento da tabela que será gerado.
+ "table.include.list": "ingestiondb.*"
+
+
+get:
+curl -i -X GET debezium:8083/connectors/stock-consolidate
+
+
+delete:
+curl -i -X DELETE debezium:8083/connectors/stock-consolidate

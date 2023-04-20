@@ -1,0 +1,66 @@
+version: '3.3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.3
+    container_name: "zookeeper-poc"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:5.5.3
+    container_name: "kafka-poc"
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9991
+    ports:
+      - "9092:9092"
+  debezium:
+    image: debezium/connect:1.9
+    container_name: "debezium-poc"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+    depends_on: [kafka]
+    ports:
+      - "8083:8083"
+    expose:
+      - 8083
+  mysql_simdb:
+    platform: linux/x86_64
+    image: mysql:5.7
+    container_name: "mysql-poc-simdb"
+    command:
+      --server-id=1
+      --log-bin=mysql-bin
+      --max-binlog-size=4096
+      --binlog-format=ROW
+      --sync-binlog=1
+      --log-slave-updates=ON
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=1000
+      --read-only=OFF
+      --binlog-rows-query-log-events=ON
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'simdb'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+      MYSQL_TCP_PORT: 3306
+      MYSQL_PORT: 3306
+    ports:
+      - "3306:3306"
+    expose:
+      - '3306'
+    volumes:
+      - my-db-2:/var/lib/mysql
+volumes:
+  my-db-2:
